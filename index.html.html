@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App With Pure JS</title>
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+        integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Top Menu Bar -->
+    <div class="nav-top">
+        <!-- Top Menu Bar Search-->
+        <div class="top-search">
+            <div class="search-container">
+                <div class="search-box-main">
+                    <input type="text" name="" id="search-box">
+                    <a class="search-icon" href="#search-box"> <i class="fas fa-search"></i></a>
+                </div>
+            </div>
+        </div>
+        <!-- Top Menu Bar Social-->
+        <div class="top-social">
+            <i class="fas fa-envelope"></i>
+            <i class="fas fa-user"></i>
+            <i class="fas fa-home"></i>
+            <i class="fas fa-sign"></i>
+            <label for="fullscreenSearchlabel"><i class="fas fa-search"></i></label>
+        </div>
+    </div>
+
+    <input type="checkbox" name="" id="fullscreenSearchlabel" />
+    <div class="fullscreenSearch">
+        <label for="fullscreenSearchlabel"><i class="fas fa-times"></i></label>
+        <input type="text" name="" id="fullscreenSearchtag" />
+    </div>
+
+    <!-- Main Navigation Menu  -->
+    <div class="nav-container">
+        <div class="logo">
+            <img src="logo.png" alt="" />
+        </div>
+        <div class="mobile-nav-bar">
+            <label for="menu-bar"><i class="fas fa-bars"></i></label>
+        </div>
+        <input type="checkbox" name="" id="menu-bar" />
+        <ul class="menu">
+            <li><a href="#">item1</a></li>
+            <li><a href="#">item2</a></li>
+            <li><a href="#">item3</a></li>
+            <li><a href="#">item4</a></li>
+            <li><a href="#">item5 </a></li>
+        </ul>
+    </div>
+    <div class="textContainer">
+        <h2>Start Creating Your Notes</h2>
+        <input type="text" name="" id="noteTitle" placeholder="Enter the title">
+        <textarea
+            style="font-size: 15px; font-weight: 500; font-family: Poppins; text-align: center; padding: 10px 0px;"
+            name="" id="textArea" cols="30" rows="6" placeholder="Enter your Note"></textarea>
+        <button class="btn btnAdd">Add Note</button>
+
+        <div class="notes">
+
+        </div>
+    </div>
+   
+    
+    <script src="main.js"></script>
+</body>
+
+</html>
