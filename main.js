@@ -1,176 +1,164 @@
+function getElement(selector) {
+  return document.querySelector(selector);
+}
 
-let search = document.querySelector("#search-box");
+function lowerCase(input) {
+  return {
+    noteTitle: input.title.toLowerCase(),
+    noteContent: input.content.toLowerCase(),
+  };
+}
+const searchElement = document.querySelector("#search-bar");
+const userResponseMessage = {
+  error: "a same note already exist",
+  success: "Note has been added successfully",
+  delete: "Note has been deleted successfully",
+  makeError(element) {
+    element.classList.remove("success");
+    element.classList.add("error");
+  },
+  makeInfo(element) {
+    element.classList.remove("error");
+    element.classList.add("success");
+  },
+  clearAll(element) {
+    element.classList.remove("success");
+    element.classList.remove("error");
+  },
+};
 
-
-
-
-let btnAdd = document.querySelector(".btnAdd");
-let textArea = document.getElementById("textArea");
-let notesTitle = document.getElementById("noteTitle");
-
-
-// Function to create notes
-btnAdd.addEventListener("click", function () {
-
-    let notes = localStorage.getItem("notes");
-    let noteTitle = localStorage.getItem("noteTitle")
-    if (notes == null && noteTitle == null) {
-        notesObj = [];
-        notetit = [];
-    }
-    else {
-        notetit = JSON.parse(noteTitle)
-        notesObj = JSON.parse(notes);
-    };
-
-    if (textArea.value != "" && notesTitle.value != "") {
-        notesObj.push(textArea.value);
-        notetit.push(notesTitle.value);
-        localStorage.setItem("noteTitle", JSON.stringify(notetit));
-        localStorage.setItem("notes", JSON.stringify(notesObj));
-        textArea.value = "";
-        notesTitle.value = "";
-        notestxt();
-    }
-    else {
-        if (textArea.value == "") {
-            textArea.value = "Empty is Not Allowed";
-            setTimeout(() => {
-                textArea.value = ""
-            }, 650)
-        }
-        if (notesTitle.value == "") {
-            notesTitle.value = "Empty is Not Allowed";
-            setTimeout(() => {
-                notesTitle.value = ""
-            }, 650)
-        }
-    }
+getElement(".nav-toggle").addEventListener("click", () => {
+  getElement(".nav-main").classList.toggle("nav-visible");
 });
 
-// Function to Create note on Enter Button Press
-textArea.addEventListener("keydown", function (e) {
-    if (e.keyCode == 13) {
-        let notes = localStorage.getItem("notes");
-        let noteTitle = localStorage.getItem("noteTitle")
-        if (notes == null && noteTitle == null) {
-            notesObj = [];
-            notetit = [];
-        }
-        else {
-            notetit = JSON.parse(noteTitle)
-            notesObj = JSON.parse(notes);
-        };
-        if (textArea.value != "" && notesTitle.value != "") {
-            notesObj.push(textArea.value);
-            notetit.push(notesTitle.value);
-            localStorage.setItem("notes", JSON.stringify(notesObj));
-            localStorage.setItem("noteTitle", JSON.stringify(notetit));
-            textArea.value = "";
-            notesTitle.value = "";
-            notestxt();
-        }
-        else {
-            if (textArea.value == "") {
-                textArea.value = "Empty is Not Allowed";
-                setTimeout(() => {
-                    textArea.value = ""
-                }, 650)
-            }
-            if (notesTitle.value == "") {
-                notesTitle.value = "Empty is Not Allowed";
-                setTimeout(() => {
-                    notesTitle.value = ""
-                }, 650)
-            }
-        };
-    }
-});
+function addNewNote(newNote) {
+  const notes = getNotes();
+  const noteId = notes.length;
+  newNote.Id = noteId;
+  notes.push(newNote);
+  localStorage.setItem("notes", JSON.stringify(notes));
+  return notes;
+}
 
+function getNotes() {
+  const notes = localStorage.getItem("notes");
+  const notesArray = JSON.parse(notes) || [];
+  return notesArray;
+}
 
-window.onload = notestxt();
-// Function to Show Notes
-function notestxt() {
+function validateUserInput(newNote) {
+  const notes = getNotes();
+  const { noteTitle: newNoteTitle, noteContent: newNoteContent } =
+    lowerCase(newNote);
+  const result = notes.every((note) => {
+    const { noteTitle, noteContent } = lowerCase(note);
+    return noteTitle !== newNoteTitle && noteContent !== newNoteContent;
+  });
+  return result;
+}
 
-    let notes = localStorage.getItem("notes");
-    let noteTitle = localStorage.getItem("noteTitle")
-    if (notes == null && noteTitle == null) {
-        notesObj = [];
-        notetit = [];
-    }
-    else {
-        notetit = JSON.parse(noteTitle)
-        notesObj = JSON.parse(notes);
-    };
+function showMessage(type) {
+  const messageElement = getElement(".message");
+  getElement("#messageText").innerText = userResponseMessage[type];
+  if (type === "error") {
+    userResponseMessage.makeError(messageElement);
+  } else {
+    userResponseMessage.makeInfo(messageElement);
+  }
+  getElement(".close-message").addEventListener("click", () => {
+    userResponseMessage.clearAll(messageElement);
+  });
+}
 
-    let html = "";
-    let indexTit = 0;
-    notesObj.forEach(function (element, index) {
-        html += `
-<div class="note">
-        <h3>${notetit.splice(indexTit, 1)}</h3>
-        <p id="this${index}" onblur="editNote(${index})" contenteditable="true">${element}</p>
-        <button onclick="noteRemove(${index})" class="btn btnRemove">Delete</button>
+function showNotes(notes) {
+  const notesElement = getElement(".notes");
+  if (notes.length > 0) {
+    const notesHtml = notes.map((note) => {
+      return `<article class="note" id="note${note.Id}">
+      <header>
+          <h3 class="note-title">
+              ${note.title}
+          </h3>
+      </header>
+      <div class="note-body">
+          <p>${note.content}</p>
       </div>
-      `;
-    })
-    indexTit += 1;
-    let noteshtml = document.querySelector('.notes');
-    if (notesObj != "") {
-        noteshtml.innerHTML = html
-    }
-    else {
-        noteshtml.innerHTML = "<h2>Nothing to Show!</h2>"
-    }
+      <div class="btn-container">
+          <button onClick="deleteNote(${note.Id})" class="delete-note"><i class="fas fa-trash-alt"></i></button>
+          <button onClick="editNote(${note.Id})" class="edit-note"><i class="far fa-edit"></i></button>
+      </div>
+    </article>`;
+    });
+    notesElement.innerHTML = notesHtml.join("");
+  } else {
+    notesElement.innerHTML =
+      "<h3 style='grid-column: 2; text-align: center;'>Nothing to Show!</h3>";
+  }
 }
 
-//  To Delete Note From DOM
-function noteRemove(index) {
-    let notes = localStorage.getItem("notes");
-    let noteTitle = localStorage.getItem("noteTitle")
-    if (notes == null && noteTitle == null) {
-        notesObj = [];
-        notetit = [];
-    }
-    else {
-        notetit = JSON.parse(noteTitle)
-        notesObj = JSON.parse(notes);
-    };
-    notetit.splice(index, 1)
-    notesObj.splice(index, 1)
-    localStorage.setItem("notes", JSON.stringify(notesObj));
-    localStorage.setItem("noteTitle", JSON.stringify(notetit));
-    notestxt()
+function deleteNote(noteId) {
+  const notes = getNotes();
+  const newNotes = notes.filter((note) => note.Id !== noteId);
+  const newNotesId = newNotes.map((note, index) => {
+    return { ...note, Id: index };
+  });
+  localStorage.setItem("notes", JSON.stringify(newNotesId));
+  showMessage("delete");
+  showNotes(newNotesId);
 }
-
 
 // Editing Notes Paragraph Text
-function editNote(index) {
-    let notes = localStorage.getItem("notes");
-    if (notes == null) {
-        notesObj = [];
-    } else {
-        notesObj = JSON.parse(notes);
-    }
-    let update = document.getElementById(`this${index}`)
-    notesObj[index] = update.innerText;
-    localStorage.setItem("notes", JSON.stringify(notesObj));
-    notestxt()
+function editNote(noteId) {
+  const note = getElement(`#note${noteId}`);
+  const noteContent = note.querySelector("p");
+  noteContent.setAttribute("contentEditable", true);
+  noteContent.focus();
+  noteContent.addEventListener("blur", () => {
+    noteContent.removeAttribute("contentEditable");
+    const notes = getNotes();
+    const newNotes = notes.map((note) => {
+      if (note.Id === noteId) {
+        note.content = noteContent.innerText;
+      }
+      return note;
+    });
+    localStorage.setItem("notes", JSON.stringify(newNotes));
+  });
 }
+// Function to create notes
+getElement(".form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const newNote = {
+    title: getElement("#noteTitle").value.trim(),
+    content: getElement("#textArea").value.trim(),
+  };
 
-// Function to Search Notes
-search.addEventListener('input', function () {
-    let searchValue = search.value.toLowerCase();
+  if (validateUserInput(newNote)) {
+    const notes = addNewNote(newNote);
+    e.target.reset();
+    showMessage("success");
+    showNotes(notes);
+  } else {
+    showMessage("error");
+  }
+});
 
-    let noteSearch = document.getElementsByClassName('note');
-    Array.from(noteSearch).forEach(function (element) {
-        let notes = element.getElementsByTagName('p')[0].innerText.toLowerCase();
-        let notestitSearch = element.getElementsByTagName('h3')[0].innerText.toLowerCase();
-        if (notes.search(searchValue) != -1 && notestitSearch.search(searchValue) != -1) {
-            element.style.display = "block"
-        }
-        else {
-            element.style.display = 'none'
-        }
-    })
-})
+document.addEventListener("DOMContentLoaded", () => {
+  const notes = getNotes();
+  showNotes(notes);
+});
+
+searchElement.addEventListener("input", searchNotes);
+function searchNotes(e) {
+  const notes = getNotes();
+  const searchTerm = this.value.toLowerCase();
+  if (searchTerm) {
+    const newNotes = notes.filter((note) => {
+      const { noteTitle, noteContent } = lowerCase(note);
+      return noteTitle.includes(searchTerm) || noteContent.includes(searchTerm);
+    });
+    showNotes(newNotes);
+  } else {
+    showNotes(notes);
+  }
+}
